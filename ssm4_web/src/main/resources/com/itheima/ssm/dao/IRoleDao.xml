@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.ssm.dao.IRoleDao">
+
+    <!--定义users表的ResultMap-->
+    <resultMap id="roleMap" type="Role">
+        <id property="id" column="id"></id>
+        <result property="roleName" column="roleName"></result>
+        <result property="roleDesc" column="roleDesc"></result>
+        <collection property="permissions" column="id" ofType="Permission" select="com.itheima.ssm.dao.IPermissionDao.findPermissionByRoleId">
+        </collection>
+    </resultMap>
+
+    <!--根据userId查询role-->
+    <select id="findByUserId" resultMap="roleMap">
+        select * from role where id in(select roleId from users_role where userId = #{userId})
+    </select>
+    <!--查询所有role-->
+    <select id="findAll" resultMap="roleMap">
+        select * from role
+    </select>
+
+    <!--保存role-->
+    <insert id="save" parameterType="Role">
+        insert into role(roleName,roleDesc) values(#{roleName},#{roleDesc})
+    </insert>
+
+    <!--根据id查询role-->
+    <select id="findById" parameterType="String" resultMap="roleMap">
+        select * from role where id = #{roleId}
+    </select>
+
+    <!--根据roleId查找所有可添加的-->
+    <select id="findOtherPermissions" parameterType="String" resultType="Permission">
+        select * from permission where id not in(select permissionId from role_permission where roleId = #{roleId})
+    </select>
+
+    <!--给role添加permissions-->
+    <insert id="addPermissionToRole" parameterType="String" >
+        insert into role_permission(roleId,permissionId) values (#{roleId},#{perId})
+    </insert>
+    <!---->
+</mapper>
